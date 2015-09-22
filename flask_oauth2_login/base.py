@@ -1,3 +1,5 @@
+import urlparse
+
 from flask import request, session, url_for
 from requests_oauthlib import OAuth2Session
 
@@ -17,20 +19,17 @@ class OAuth2Login(object):
     self.client_secret = self.get_config(app, "CLIENT_SECRET")
     self.scope = self.get_config(app, "SCOPE", self.default_scope).split(",")
     self.redirect_scheme = self.get_config(app, "REDIRECT_SCHEME", "https")
+    self._redirect_path = self.get_config(app, "REDIRECT_PATH", self.default_redirect_path)
 
     app.add_url_rule(
-      self.get_config(app, "REDIRECT_PATH", self.default_redirect_path),
+      self._redirect_path,
       self.redirect_endpoint,
       self.login,
     )
 
   @property
   def redirect_uri(self):
-    return url_for(
-      self.redirect_endpoint,
-      _external=True,
-      _scheme=self.redirect_scheme,
-    )
+    return urlparse.urljoin(request.url, self._redirect_path)
 
   def session(self):
     return OAuth2Session(

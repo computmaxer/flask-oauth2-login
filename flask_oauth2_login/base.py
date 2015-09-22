@@ -29,7 +29,8 @@ class OAuth2Login(object):
 
   @property
   def redirect_uri(self):
-    return urlparse.urljoin(request.url, self._redirect_path)
+    hostname = request.environ['wsgi.url_scheme'] + '://' + request.environ['HTTP_HOST']
+    return urlparse.urljoin(hostname, self._redirect_path)
 
   def session(self):
     return OAuth2Session(

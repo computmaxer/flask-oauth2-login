@@ -29,10 +29,12 @@ class OAuth2Login(object):
 
   @property
   def redirect_uri(self):
-    hostname = request.headers.get('Origin')
-    if not hostname:
-        hostname = request.url
-    return urlparse.urljoin(hostname, self._redirect_path)
+    host = request.headers.get('X-Forwarded-Host')
+    if not host:
+        host = request.url
+    else:
+        host = request.environ['wsgi.url_scheme'] + '://' + host
+    return urlparse.urljoin(host, self._redirect_path)
 
   def session(self):
     return OAuth2Session(

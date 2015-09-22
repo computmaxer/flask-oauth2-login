@@ -29,22 +29,19 @@ class OAuth2Login(object):
 
   @property
   def redirect_uri(self):
-    host = request.headers.get('X-Forwarded-Host')
-    if not host:
-        host = request.url
-    else:
-        host = request.environ['wsgi.url_scheme'] + '://' + host
-    return urlparse.urljoin(host, self._redirect_path)
+    return urlparse.urljoin(request.url, self._redirect_path)
 
-  def session(self):
+  def session(self, redirect_uri=None):
+    if not redirect_uri:
+        redirect_uri = self.redirect_uri
     return OAuth2Session(
       self.client_id,
-      redirect_uri=self.redirect_uri,
+      redirect_uri=redirect_uri,
       scope=self.scope,
     )
 
-  def authorization_url(self, **kwargs):
-    sess = self.session()
+  def authorization_url(self, redirect_uri=None, **kwargs):
+    sess = self.session(redirect_uri)
     auth_url, state = sess.authorization_url(self.auth_url, **kwargs)
     session[self.state_session_key] = state
     return auth_url

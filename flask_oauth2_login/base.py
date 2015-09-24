@@ -1,3 +1,4 @@
+import base64
 import urlparse
 
 from flask import request, session, url_for
@@ -40,14 +41,15 @@ class OAuth2Login(object):
       scope=self.scope,
     )
 
-  def authorization_url(self, redirect_uri=None, **kwargs):
-    sess = self.session(redirect_uri)
+  def authorization_url(self, manual_redirect_uri=None, **kwargs):
+    sess = self.session(manual_redirect_uri)
     auth_url, state = sess.authorization_url(self.auth_url, **kwargs)
     session[self.state_session_key] = state
+    session['redirect_uri'] = manual_redirect_uri
     return auth_url
 
   def login(self):
-    sess = self.session()
+    sess = self.session(session.get('redirect_uri', None))
 
     # Get token
     try:

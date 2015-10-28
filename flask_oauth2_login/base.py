@@ -30,7 +30,9 @@ class OAuth2Login(object):
 
   @property
   def redirect_uri(self):
-    return urlparse.urljoin(request.url, self._redirect_path)
+    joined = urlparse.urljoin(request.url, self._redirect_path)
+    parsed = urlparse.urlparse(joined)
+    return parsed._replace(scheme=self.redirect_scheme).geturl()
 
   def session(self, redirect_uri=None):
     if not redirect_uri:
